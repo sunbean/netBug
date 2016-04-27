@@ -16,7 +16,6 @@ typedef struct Web
     char *dest;
     char *host;
     char *ip;
-    char *file;
     struct Web *next;
     struct Web *child;
 }Web;
@@ -42,5 +41,5 @@ void parse_link(char *weblink, Web *link);
 void get_host(Web *link);
 void get_ip(Web *link);
 char *pack_msg(Web *link);
-void communicate_web(Web *link);
+void communicate_web(int *fd, Web *link);
 

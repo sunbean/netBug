@@ -1,4 +1,40 @@
 #include "declare.h"
+void parse_html(int *fd, Web *pnode)
+{
+    int num = 0;
+    char buff[256] = "";
+    char mem[64] = "";
+    bool flag = true;
+    while ((num=read(fd[0], buff, sizeof(char)*255)) > 0)
+    {
+        char *p = buff;
+        if (!flag) 
+        {
+            char *q = buff;
+            int i = strlen(mem);
+            for (; *q != '\"'; ++q, ++i)
+            {
+                mem[i] = *q;
+            }
+            //add_in_web(pnode, mem);
+            memset(mem, 0, sizeof(char)*64);
+            flag = true;
+        }
+        while ((p=strstr(p, "href=\"")) != NULL)
+        {
+            p = p+6;
+            char *q = mem;
+            while (*p != '\"' && *p != 0) *q++ = *p++;
+            if (*p == 0) flag = false;    //cur time unfinish
+            else
+            {
+               // add_in_web(pnode, mem);  //todo
+                memset(mem, 0, sizeof(char)*64);
+            }
+        }
+        memset(buff, 0, sizeof(char)*256);
+    }
+}
 char *pack_msg(Web *link)
 {
     char *msg = (char *)calloc(1024, sizeof(char));
@@ -12,7 +48,7 @@ char *pack_msg(Web *link)
     strcat(msg, "\r\n\r\n");
     return msg;
 }
-void communicate_web(Web *link)
+void communicate_web(int *fd, Web *link)
 {
     struct sockaddr_in sockname;
     memset(&sockname, 0, sizeof(sockname));
@@ -30,14 +66,11 @@ void communicate_web(Web *link)
     send(sockfd, msg, strlen(msg), 0);
     char getBuff[256] = "";
     int num = 0;
-    int fd = open("./doc/file", O_WRONLY|O_CREAT, 0644);
-    if (fd == -1) perror("open");
     while ((num=read(sockfd, getBuff, 255)) > 0)
     {
-        write(fd, getBuff, sizeof(char)*num);
+        write(fd[1], getBuff, sizeof(char)*num);
         memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
     }
-    close(fd);
 }
 void get_ip(Web *link)
 {
@@ -85,13 +118,4 @@ void parse_link(char *weblink, Web *link)
     link->dest = dest;
     get_host(link);
     get_ip(link);
-}
-int main (int argc, char ** argv)
-{
-    char weblink[64] = "http://www.cnblogs.com/wawlian/archive/2012/06/18/2553061.html" ;
-    Web *pnode = (Web *)malloc(sizeof(Web));
-    assert(pnode != NULL);
-    parse_link(weblink, pnode);
-    communicate_web(pnode);
-    return 0;
 }
