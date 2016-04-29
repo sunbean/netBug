@@ -17,10 +17,10 @@ void reduce_same_web(char **str, int size)
 }
 bool is_exist(Web *link, char *str)
 {
-    while (link != NULL)
+    while (link != NULL && link->dest != NULL)
     {
-        if ((link->child != NULL && is_exist(link->child, str)) || 
-            (link->child == NULL && strcmp(str, link->dest) == 0))
+        if (strcmp(str, link->dest) == 0 ||
+            (link->child != NULL && is_exist(link->child, str)))
         {
             free(str);
             return true;
@@ -32,27 +32,30 @@ bool is_exist(Web *link, char *str)
 void insert_link(Web *link, char *str)
 {
     /*deal with first node*/
-    if (link->next == NULL)
+    if (link->dest == NULL)
     {
         parse_link(str, link);
+        push(&stack, link);
     }
     /*deal with other node*/
     else 
     {
         Web *next = link->next;
-        link->next = (Web *)malloc(sizeof(Web)*1);
+        link->next = (Web *)calloc(1, sizeof(Web));
         assert(link->next != NULL);
         /*through str get link msg and fill in link->next*/
         parse_link(str, link->next);
         link->next->next = next;
+        push(&stack, link->next);
     }
+    free(str);
 }
 void add_into_web(Web *g_link, Web *l_link, char **str, int size)
 {
     int i = 0;
     for (; i<size; ++i)
     {
-        if (str[i] != NULL && !is_exist(g_link, str[i]))  //todo
+        if (str[i] != NULL && !is_exist(g_link, str[i]))
         {
             insert_link(l_link, str[i]);
         }
@@ -121,7 +124,7 @@ char *pack_msg(Web *link)
     strcat(msg, "\r\n\r\n");
     return msg;
 }
-void communicate_web(int *fd, Web *link)
+int communicate_web(int *fd, Web *link)
 {
     struct sockaddr_in sockname;
     memset(&sockname, 0, sizeof(sockname));
@@ -137,13 +140,14 @@ void communicate_web(int *fd, Web *link)
     printf("connect with one web\n");
     char *msg = pack_msg(link);
     send(sockfd, msg, strlen(msg), 0);
-    char getBuff[256] = "";
-    int num = 0;
-    while ((num=read(sockfd, getBuff, 255)) > 0)
-    {
-        write(fd[1], getBuff, sizeof(char)*num);
-        memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
-    }
+    return sockfd;
+    //char getBuff[256] = "";
+    //int num = 0;
+    //while ((num=read(sockfd, getBuff, 255)) > 0)
+    //{
+    //    write(fd[1], getBuff, sizeof(char)*num);
+    //    memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
+    //}
 }
 void get_ip(Web *link)
 {
@@ -192,12 +196,12 @@ void parse_link(char *weblink, Web *link)
     get_host(link);
     get_ip(link);
 }
-void show_web()
+void show_web(Web *p)
 {
-    Web *p = g_link;
     while (p != NULL)
     {
-        if (p->child != NULL) show_web(p->child);
         printf("%s\n", p->dest);
+        if (p->child != NULL) show_web(p->child);
+        p = p->next;
     }
 }

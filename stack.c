@@ -26,6 +26,21 @@ void pop(Stack *stack)
     prev->next = NULL;
     stack->top = prev;
 }
+bool empty(Stack *stack)
+{
+    return stack->pnode == stack->top;
+}
+int count(Stack *stack)
+{
+    int num = 0;
+    Node *p = stack->pnode->next;
+    while (p != NULL) 
+    {
+        p = p->next;
+        ++num;
+    }
+    return num;
+}
 Web *top(Stack *stack)
 {
     if (stack == NULL || stack->top == stack->pnode) return NULL;

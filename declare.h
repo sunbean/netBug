@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <stdbool.h>
-
+#define MAX 3
 typedef struct Web
 {
     char *dest;
@@ -34,12 +34,15 @@ typedef struct Stack
     Node *top;
     Node *pnode;
 }Stack;
+/*a stack*/
+Stack stack;
 void init_stack(Stack *);
 void parse_html(int *fd, Web *pnode);
 void push(Stack *, Web *);
 void pop(Stack *);
 Web *top(Stack *);
-
+int count(Stack*);
+bool empty(Stack *stack);
 
 
 /*parse a web link to get dest_url, host, ip*/
@@ -47,7 +50,7 @@ void parse_link(char *weblink, Web *link);
 void get_host(Web *link);
 void get_ip(Web *link);
 char *pack_msg(Web *link);
-void communicate_web(int *fd, Web *link);
+int communicate_web(int *fd, Web *link);
 /*over parse add the msg into Web*/
 void add_into_web(Web *g_link, Web *l_link, char **str, int size);
 void insert_link(Web *link, char *str);
