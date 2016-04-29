@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 typedef struct Web
 {
@@ -19,8 +20,9 @@ typedef struct Web
     struct Web *next;
     struct Web *child;
 }Web;
-
-
+/*a global web type var for the all link*/
+Web *g_link;
+/*a simple and useful stack*/
 typedef struct Node 
 {
     Web *data;
@@ -33,13 +35,22 @@ typedef struct Stack
     Node *pnode;
 }Stack;
 void init_stack(Stack *);
+void parse_html(int *fd, Web *pnode);
 void push(Stack *, Web *);
 void pop(Stack *);
 Web *top(Stack *);
+
+
+
 /*parse a web link to get dest_url, host, ip*/
 void parse_link(char *weblink, Web *link);
 void get_host(Web *link);
 void get_ip(Web *link);
 char *pack_msg(Web *link);
 void communicate_web(int *fd, Web *link);
-
+/*over parse add the msg into Web*/
+void add_into_web(Web *g_link, Web *l_link, char **str, int size);
+void insert_link(Web *link, char *str);
+bool is_exist(Web *link, char *str);
+void reduce_same_web(char **str, int size);
+void show_web();

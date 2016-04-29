@@ -1,9 +1,71 @@
 #include "declare.h"
+void reduce_same_web(char **str, int size)
+{
+    int i = 0;
+    for (; i<size; ++i)
+    {
+        int j = i+1;
+        for (; j<size && str[i] != NULL; ++j)
+        {
+            if (str[j] != NULL && strcmp(str[j], str[i]) == 0)
+            {
+                free(str[j]);
+                str[j] = NULL;
+            }
+        }
+    }
+}
+bool is_exist(Web *link, char *str)
+{
+    while (link != NULL)
+    {
+        if ((link->child != NULL && is_exist(link->child, str)) || 
+            (link->child == NULL && strcmp(str, link->dest) == 0))
+        {
+            free(str);
+            return true;
+        }
+        link = link->next;
+    }
+    return false;
+}
+void insert_link(Web *link, char *str)
+{
+    /*deal with first node*/
+    if (link->next == NULL)
+    {
+        parse_link(str, link);
+    }
+    /*deal with other node*/
+    else 
+    {
+        Web *next = link->next;
+        link->next = (Web *)malloc(sizeof(Web)*1);
+        assert(link->next != NULL);
+        /*through str get link msg and fill in link->next*/
+        parse_link(str, link->next);
+        link->next->next = next;
+    }
+}
+void add_into_web(Web *g_link, Web *l_link, char **str, int size)
+{
+    int i = 0;
+    for (; i<size; ++i)
+    {
+        if (str[i] != NULL && !is_exist(g_link, str[i]))  //todo
+        {
+            insert_link(l_link, str[i]);
+        }
+    }
+}
+
 void parse_html(int *fd, Web *pnode)
 {
     int num = 0;
     char buff[256] = "";
-    char mem[64] = "";
+    char mem[128] = "";
+    char *str[100];      // has limit
+    int k = 0;
     bool flag = true;
     while ((num=read(fd[0], buff, sizeof(char)*255)) > 0)
     {
@@ -16,11 +78,17 @@ void parse_html(int *fd, Web *pnode)
             {
                 mem[i] = *q;
             }
-            //add_in_web(pnode, mem);
+
+            str[k] = (char *)malloc(strlen(mem)+1);
+            assert (str[k] != NULL);
+            strcpy(str[k], mem);
+            ++k;
+
+            p = q + 1;
             memset(mem, 0, sizeof(char)*64);
-            flag = true;
+           flag = true;
         }
-        while ((p=strstr(p, "href=\"")) != NULL)
+        while ((p=strstr(p, "href=\"http:")) != NULL)
         {
             p = p+6;
             char *q = mem;
@@ -28,12 +96,17 @@ void parse_html(int *fd, Web *pnode)
             if (*p == 0) flag = false;    //cur time unfinish
             else
             {
-               // add_in_web(pnode, mem);  //todo
+                str[k] = (char *)malloc(strlen(mem)+1);
+                assert (str[k] != NULL);
+                strcpy(str[k], mem);
+                ++k;
                 memset(mem, 0, sizeof(char)*64);
             }
         }
         memset(buff, 0, sizeof(char)*256);
     }
+    reduce_same_web(str, k);
+    add_into_web(g_link, pnode, str, k);
 }
 char *pack_msg(Web *link)
 {
@@ -118,4 +191,13 @@ void parse_link(char *weblink, Web *link)
     link->dest = dest;
     get_host(link);
     get_ip(link);
+}
+void show_web()
+{
+    Web *p = g_link;
+    while (p != NULL)
+    {
+        if (p->child != NULL) show_web(p->child);
+        printf("%s\n", p->dest);
+    }
 }
