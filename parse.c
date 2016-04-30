@@ -136,7 +136,8 @@ char *pack_msg(Web *link)
 {
     char *msg = (char *)calloc(1024, sizeof(char));
     assert(msg != NULL);
-    strcpy(msg, "GET ");
+    //strcpy(msg, "GET ");
+    strcpy(msg, "HEAD ");
     strcat(msg, link->dest);
     strcat(msg, " HTTP/1.1\r\n");
     strcat(msg, "HOST: ");
@@ -158,7 +159,7 @@ int communicate_web(Web *link)
                 (struct sockaddr *)&sockname, 
                 sizeof(sockname))<0)
         perror("connect");
-    printf("connect with one web\n");
+    //printf("connect with one web\n");
     char *msg = pack_msg(link);
     send(sockfd, msg, strlen(msg), 0);
     return sockfd;
@@ -167,10 +168,16 @@ void get_msg_from_fd(int w_fd, int r_fd)
 {
     char getBuff[256] = "";
     int num = 0;
-    while ((num=read(r_fd, getBuff, 255)) > 0)
+    read(r_fd, getBuff, 20);
+    char *p = getBuff;
+    p = strstr(p, " ");
+    if (strncmp(p, SUC, 3) == 0)
     {
-        write(w_fd, getBuff, sizeof(char)*num);
-        memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
+        while ((num=read(r_fd, getBuff, 255)) > 0)
+        {
+            write(w_fd, getBuff, sizeof(char)*num);
+            memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
+        }
     }
 }
 void get_ip(Web *link)

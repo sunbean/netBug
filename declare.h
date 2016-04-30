@@ -14,6 +14,8 @@
 #include <pthread.h>
 #define MAX 3
 #define END_MSG "ONE TIME IS OVER"
+#define SUC "200"
+#define ERROR "400"
 typedef struct Web
 {
     char *dest;
@@ -44,6 +46,7 @@ void pop(Stack *);
 Web *top(Stack *);
 int count(Stack*);
 bool empty(Stack *stack);
+void show(Stack *stack);
 
 
 /*parse a web link to get dest_url, host, ip*/

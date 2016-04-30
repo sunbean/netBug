@@ -48,10 +48,11 @@ Web *top(Stack *stack)
 }
 void show(Stack *stack)
 {
-    Node *p = stack->pnode;
+    Node *p = stack->pnode->next;
     while (p != stack->top)
     {
         printf("%s\n", p->data->dest);
+        p = p->next;
     }
 }
 

@@ -4,6 +4,8 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+END_MSG	declare.h	16;"	d
+MAX	declare.h	15;"	d
 Node	declare.h	/^typedef struct Node $/;"	s
 Node	declare.h	/^}Node;$/;"	t	typeref:struct:Node
 Stack	declare.h	/^typedef struct Stack$/;"	s
@@ -12,25 +14,28 @@ Web	declare.h	/^typedef struct Web$/;"	s
 Web	declare.h	/^}Web;$/;"	t	typeref:struct:Web
 add_into_web	parse.c	/^void add_into_web(Web *g_link, Web *l_link, char **str, int size)$/;"	f
 child	declare.h	/^    struct Web *child;$/;"	m	struct:Web	typeref:struct:Web::Web
-child_do	process.c	/^void child_do(Web *link, int *fd, Stack *stack)$/;"	f
-communicate_web	parse.c	/^void communicate_web(int *fd, Web *link)$/;"	f
+child_do	thread.c	/^void *child_do(void *p)$/;"	f
+communicate_web	parse.c	/^int communicate_web(Web *link)$/;"	f
+count	stack.c	/^int count(Stack *stack)$/;"	f
 data	declare.h	/^    Web *data;$/;"	m	struct:Node
 dest	declare.h	/^    char *dest;$/;"	m	struct:Web
 destory_stack	stack.c	/^void destory_stack(Stack *stack)$/;"	f
+empty	stack.c	/^bool empty(Stack *stack)$/;"	f
 g_link	declare.h	/^Web *g_link;$/;"	v
 get_host	parse.c	/^void get_host(Web *link)$/;"	f
 get_ip	parse.c	/^void get_ip(Web *link)$/;"	f
+get_msg_from_fd	parse.c	/^void get_msg_from_fd(int w_fd, int r_fd)$/;"	f
 host	declare.h	/^    char *host;$/;"	m	struct:Web
 init_stack	stack.c	/^void init_stack(Stack *stack)$/;"	f
 insert_link	parse.c	/^void insert_link(Web *link, char *str)$/;"	f
 ip	declare.h	/^    char *ip;$/;"	m	struct:Web
 is_exist	parse.c	/^bool is_exist(Web *link, char *str)$/;"	f
 main	main.c	/^int main()$/;"	f
-main	process.c	/^int main ()$/;"	f
+main	thread.c	/^int main ()$/;"	f
 next	declare.h	/^    struct Node *next;$/;"	m	struct:Node	typeref:struct:Node::Node
 next	declare.h	/^    struct Web *next;$/;"	m	struct:Web	typeref:struct:Web::Web
 pack_msg	parse.c	/^char *pack_msg(Web *link)$/;"	f
-parent_do	process.c	/^void parent_do(Web *link, int *fd, Stack *stack)$/;"	f
+parent_do	thread.c	/^void parent_do(int *fd, char *str)$/;"	f
 parse_html	parse.c	/^void parse_html(int *fd, Web *pnode)$/;"	f
 parse_link	parse.c	/^void parse_link(char *weblink, Web *link)$/;"	f
 pnode	declare.h	/^    Node *pnode;$/;"	m	struct:Stack
@@ -38,6 +43,9 @@ pop	stack.c	/^void pop(Stack *stack)$/;"	f
 prev	declare.h	/^    struct Node *prev;$/;"	m	struct:Node	typeref:struct:Node::Node
 push	stack.c	/^void push(Stack *stack, Web *d)$/;"	f
 reduce_same_web	parse.c	/^void reduce_same_web(char **str, int size)$/;"	f
-show_web	parse.c	/^void show_web()$/;"	f
+remove_from	thread.c	/^void remove_from(int *arr, int i, int max)$/;"	f
+show	stack.c	/^void show(Stack *stack)$/;"	f
+show_web	parse.c	/^void show_web(Web *p)$/;"	f
+stack	declare.h	/^Stack stack;$/;"	v
 top	declare.h	/^    Node *top;$/;"	m	struct:Stack
 top	stack.c	/^Web *top(Stack *stack)$/;"	f
