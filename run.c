@@ -1,5 +1,6 @@
 #include "declare.h"
 /*get one link from stack, */
+int web_num = 0;
 void *child_do(void *fd);
 void parent_do(int *fd, char *);
 Web * remove_from(int *arr, Web ** set, int i, int max)
@@ -12,15 +13,14 @@ Web * remove_from(int *arr, Web ** set, int i, int max)
     }
     return res;
 }
-int main ()
+int main (int argc, char **argv)
 {
-    char weblink[64] = "http://www.cnblogs.com/wawlian/archive/2012/06/18/2553061.html" ;
-    char *str = (char *)calloc(strlen(weblink)+1, sizeof(char));
+    char *str = (char *)calloc(strlen(argv[1])+1, sizeof(char));
     assert (str != NULL);
-    strcpy(str, weblink);
+    strcpy(str, argv[1]);
     g_link = (Web *)calloc(1, sizeof(Web));
     assert (g_link != NULL);
-    parse_link(weblink, g_link);
+    parse_link(argv[1], g_link);
     init_stack(&stack);
 
     int fd[2];
@@ -29,11 +29,11 @@ int main ()
         perror("pipe");
         return -1;
     }
-    insert_link(g_link, str);
     push(&stack, g_link);
     fd_set read_fd;
     FD_ZERO(&read_fd);
-    while (1)
+    web_num = 0;
+    while (web_num < 1000)
     {
         static int i = 0;
         int _read[MAX] = {0};
@@ -65,6 +65,7 @@ int main ()
                 p->child = (Web *)calloc(1, sizeof(Web));
                 assert (p->child != NULL);
                 parse_html(fd, p->child);
+                ++web_num;
             }
         }
     }

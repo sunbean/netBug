@@ -54,6 +54,7 @@ void show(Stack *stack)
         printf("%s\n", p->data->dest);
         p = p->next;
     }
+    printf("%s\n", p->data->dest);
 }
 
 void destory_stack(Stack *stack)

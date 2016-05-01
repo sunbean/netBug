@@ -1,4 +1,62 @@
 #include "declare.h"
+void judge_web_link(char **str, int size)
+{
+    int i = 0;
+    for (; i<size; ++i)
+    {
+        if (str[i] != NULL)
+        {
+            char *sstr = (char *)malloc(strlen(str[i])+1);
+            assert (sstr != NULL);
+            strcpy(sstr, str[i]);
+            char *host = strstr(sstr, "http://")+7;
+            host = strtok(host, "/");
+            //printf("%s\n", host);
+
+            struct hostent * p = gethostbyname(host);
+            if (p == NULL) 
+            {
+                perror("gethostbyname");
+                exit(-1);
+            }
+            char ipname[32] = "";
+            inet_ntop(p->h_addrtype, *(p->h_addr_list), ipname, sizeof(ipname));
+            struct sockaddr_in sockname;
+            memset(&sockname, 0, sizeof(sockname));
+            int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+            if (sockfd == -1) perror("socket");
+            sockname.sin_family = AF_INET;
+            sockname.sin_port = htons(80);
+            //printf("%s\n", ipname);
+            sockname.sin_addr.s_addr = inet_addr(ipname);
+            if (connect(sockfd, 
+                        (struct sockaddr *)&sockname, 
+                        sizeof(sockname))<0)
+                perror("connect");
+            char *msg = (char *)calloc(1024, sizeof(char));
+            assert(msg != NULL);
+            strcpy(msg, "HEAD ");
+            strcat(msg, str[i]);
+            strcat(msg, " HTTP/1.1\r\n");
+            strcat(msg, "HOST: ");
+            strcat(msg, host);
+            free(sstr);
+            strcat(msg, "\r\nConnection: closed");
+            strcat(msg, "\r\n\r\n");
+            send(sockfd, msg, strlen(msg), 0);
+            free(msg);
+            char getBuff[256] = "";
+            read(sockfd, getBuff, 255);
+            char *tmp = strstr(getBuff, " ");
+            ++tmp;
+            if (strncmp(tmp, SUC, 3) != 0)
+            {
+                free(str[i]);
+                str[i] = NULL;
+            }
+        }
+    }
+}
 void reduce_same_web(char **str, int size)
 {
     int i = 0;
@@ -22,7 +80,7 @@ bool is_exist(Web *link, char *str)
         if (strcmp(str, link->dest) == 0 ||
             (link->child != NULL && is_exist(link->child, str)))
         {
-            free(str);
+            //free(str);
             return true;
         }
         link = link->next;
@@ -48,7 +106,6 @@ void insert_link(Web *link, char *str)
         link->next->next = next;
         push(&stack, link->next);
     }
-    free(str);
 }
 void add_into_web(Web *g_link, Web *l_link, char **str, int size)
 {
@@ -67,7 +124,7 @@ void parse_html(int *fd, Web *pnode)
     int num = 0;
     char buff[256] = "";
     char mem[128] = "";
-    char *str[100];      // has limit
+    char *str[256];      // has limit
     int k = 0;
     bool flag = true;
     bool tag = true;
@@ -129,15 +186,20 @@ void parse_html(int *fd, Web *pnode)
             ++k;
         }
     }
-    reduce_same_web(str, k);
-    add_into_web(g_link, pnode, str, k);
+    if (str[0] != NULL)
+    {
+
+        reduce_same_web(str, k);
+        judge_web_link(str, k);
+        add_into_web(g_link, pnode, str, k);
+    }
+    //free_str(str, k); todo
 }
 char *pack_msg(Web *link)
 {
     char *msg = (char *)calloc(1024, sizeof(char));
     assert(msg != NULL);
-    //strcpy(msg, "GET ");
-    strcpy(msg, "HEAD ");
+    strcpy(msg, "GET ");
     strcat(msg, link->dest);
     strcat(msg, " HTTP/1.1\r\n");
     strcat(msg, "HOST: ");
@@ -171,6 +233,7 @@ void get_msg_from_fd(int w_fd, int r_fd)
     read(r_fd, getBuff, 20);
     char *p = getBuff;
     p = strstr(p, " ");
+    ++p;
     if (strncmp(p, SUC, 3) == 0)
     {
         while ((num=read(r_fd, getBuff, 255)) > 0)

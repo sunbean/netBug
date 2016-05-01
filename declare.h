@@ -1,3 +1,5 @@
+#ifndef _DECLARE_
+#define _DECLARE_ 1
 #include <strings.h>
 #include <string.h>
 #include <stdio.h>
@@ -63,3 +65,4 @@ bool is_exist(Web *link, char *str);
 void reduce_same_web(char **str, int size);
 void show_web();
 void parse_html(int *fd, Web *pnode);
+#endif
