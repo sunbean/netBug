@@ -124,7 +124,7 @@ char *pack_msg(Web *link)
     strcat(msg, "\r\n\r\n");
     return msg;
 }
-int communicate_web(int *fd, Web *link)
+int communicate_web(Web *link)
 {
     struct sockaddr_in sockname;
     memset(&sockname, 0, sizeof(sockname));
@@ -141,13 +141,16 @@ int communicate_web(int *fd, Web *link)
     char *msg = pack_msg(link);
     send(sockfd, msg, strlen(msg), 0);
     return sockfd;
-    //char getBuff[256] = "";
-    //int num = 0;
-    //while ((num=read(sockfd, getBuff, 255)) > 0)
-    //{
-    //    write(fd[1], getBuff, sizeof(char)*num);
-    //    memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
-    //}
+}
+void get_msg_from_fd(int w_fd, int r_fd)
+{
+    char getBuff[256] = "";
+    int num = 0;
+    while ((num=read(r_fd, getBuff, 255)) > 0)
+    {
+        write(w_fd, getBuff, sizeof(char)*num);
+        memset(getBuff, 0, sizeof(getBuff)*sizeof(char));
+    }
 }
 void get_ip(Web *link)
 {

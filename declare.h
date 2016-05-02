@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <ptread.h>
 #define MAX 3
 typedef struct Web
 {
@@ -51,6 +52,7 @@ void get_host(Web *link);
 void get_ip(Web *link);
 char *pack_msg(Web *link);
 int communicate_web(int *fd, Web *link);
+void get_msg_from_fd(int, int);
 /*over parse add the msg into Web*/
 void add_into_web(Web *g_link, Web *l_link, char **str, int size);
 void insert_link(Web *link, char *str);
