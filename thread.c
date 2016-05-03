@@ -1,6 +1,6 @@
 #include "declare.h"
 /*get one link from stack, */
-void child_do(int *fd);
+void *child_do(void *fd);
 void parent_do(int *fd, char *);
 void remove_from(int *arr, int i, int max)
 {
@@ -21,21 +21,25 @@ void *child_do(void *p)
     {
         static int i = 0;
         int _read[MAX-1] = {0};
-        if (!empty(&stack) && i<MAX)
+        sleep(10);
+        while (!empty(&stack) && i<MAX)
         {
             Web *p = top(&stack);
             pop(&stack);
             _read[i] = communicate_web(p); 
-            FD_SET(_read, &read_fd);
+            FD_SET(_read[i], &read_fd);
             ++i;
         }
         if (i == 0) continue;
-        select(_read+1, &read_fd, NULL, NULL, NULL);
-        for (int j=0; j<i+1; ++j)
+        select(_read[i-1]+1, &read_fd, NULL, NULL, NULL);
+        int j = 0;
+        for (j=0; j<i+1; ++j)
         {
             if(FD_ISSET(_read[j], &read_fd))
             {
                 get_msg_from_fd(fd[1], _read[j]);
+                char buff[64] = END_MSG;
+                send(fd[1], buff, strlen(buff), 0);
                 FD_CLR(_read[j], &read_fd);
                 remove_from(_read, j, i);
                 --i;
@@ -56,9 +60,9 @@ void parent_do(int *fd, char *str)
 int main ()
 {
     char weblink[64] = "http://www.cnblogs.com/wawlian/archive/2012/06/18/2553061.html" ;
-    char *str = (char *)calloc(weblink+1, sizeof(char));
+    char *str = (char *)calloc(strlen(weblink)+1, sizeof(char));
     assert (str != NULL);
-    srrcpy(str, weblink);
+    strcpy(str, weblink);
     g_link = (Web *)calloc(1, sizeof(Web));
     assert (g_link != NULL);
     parse_link(weblink, g_link);

@@ -11,8 +11,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <stdbool.h>
-#include <ptread.h>
+#include <pthread.h>
 #define MAX 3
+#define END_MSG "ONE TIME IS OVER"
 typedef struct Web
 {
     char *dest;
@@ -38,7 +39,6 @@ typedef struct Stack
 /*a stack*/
 Stack stack;
 void init_stack(Stack *);
-void parse_html(int *fd, Web *pnode);
 void push(Stack *, Web *);
 void pop(Stack *);
 Web *top(Stack *);
@@ -51,7 +51,7 @@ void parse_link(char *weblink, Web *link);
 void get_host(Web *link);
 void get_ip(Web *link);
 char *pack_msg(Web *link);
-int communicate_web(int *fd, Web *link);
+int communicate_web(Web *link);
 void get_msg_from_fd(int, int);
 /*over parse add the msg into Web*/
 void add_into_web(Web *g_link, Web *l_link, char **str, int size);
@@ -59,3 +59,4 @@ void insert_link(Web *link, char *str);
 bool is_exist(Web *link, char *str);
 void reduce_same_web(char **str, int size);
 void show_web();
+void parse_html(int *fd, Web *pnode);

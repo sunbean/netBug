@@ -46,6 +46,15 @@ Web *top(Stack *stack)
     if (stack == NULL || stack->top == stack->pnode) return NULL;
     return stack->top->data;
 }
+void show(Stack *stack)
+{
+    Node *p = stack->pnode;
+    while (p != stack->top)
+    {
+        printf("%s\n", p->data->dest);
+    }
+}
+
 void destory_stack(Stack *stack)
 {
     Node *p = stack->top;

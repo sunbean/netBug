@@ -70,9 +70,17 @@ void parse_html(int *fd, Web *pnode)
     char *str[100];      // has limit
     int k = 0;
     bool flag = true;
-    while ((num=read(fd[0], buff, sizeof(char)*255)) > 0)
+    bool tag = true;
+    char *end = NULL;
+    while (tag && (num=read(fd[0], buff, sizeof(char)*255)) > 0)
     {
+        end = strstr(buff, END_MSG);
         char *p = buff;
+        if (end != NULL)
+        {
+            p = strtok(buff, END_MSG);
+            tag = false;
+        }
         if (!flag) 
         {
             char *q = buff;
@@ -107,6 +115,19 @@ void parse_html(int *fd, Web *pnode)
             }
         }
         memset(buff, 0, sizeof(char)*256);
+    }
+    if (end != NULL)
+    {
+        while ((end=strstr(end, "href=\"http:")) != NULL)
+        {
+            end = end+6;
+            char *q = mem;
+            while (*end != '\"' && *end != 0) *q++ = *end++;
+            str[k] = (char *)malloc(strlen(mem)+1);
+            assert (str[k] != NULL);
+            strcpy(str[k], mem);
+            ++k;
+        }
     }
     reduce_same_web(str, k);
     add_into_web(g_link, pnode, str, k);
