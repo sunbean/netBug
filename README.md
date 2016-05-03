@@ -33,8 +33,7 @@
        >
       >* secure
       >明文传输与ssl加密传输, RC4的加密
-      >* 
-      ![Alt text](http.png )
+      >* ![Alt text](http.png )
       >
       >* port 80 443
      >
